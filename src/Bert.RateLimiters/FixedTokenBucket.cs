@@ -3,19 +3,20 @@
     public class FixedTokenBucket : TokenBucket
     {
         public FixedTokenBucket(
-            long maxTokens,
+            long bucketTokenCapacity,
             long refillInterval,
-            long refillIntervalInMilliSeconds) : base(maxTokens, refillInterval, refillIntervalInMilliSeconds)
+            long refillIntervalInMilliSeconds) : base(bucketTokenCapacity, refillInterval, refillIntervalInMilliSeconds)
         {
         }
 
-        protected override void UpdateTokens()
+        protected override void UpdateTokensInBucket()
         {
-            var currentTime = SystemTime.UtcNow.Ticks;
-            if (currentTime < nextRefillTime) return;
+            var currentTimeInTicks = SystemTime.UtcNow.Ticks;
+            if (currentTimeInTicks < nextRefillTimeInTicks) return;
 
+            // Full refill after interval
             tokens = bucketTokenCapacity;
-            nextRefillTime = currentTime + ticksRefillInterval;
+            nextRefillTimeInTicks = currentTimeInTicks + ticksPerRefillInterval;
         }
     }
 }

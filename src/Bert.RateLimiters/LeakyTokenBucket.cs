@@ -8,13 +8,14 @@ namespace Bert.RateLimiters
         protected long ticksStepInterval;
 
         protected LeakyTokenBucket(
-            long maxTokens,
+            long bucketTokenCapacity,
             long refillInterval,
             int refillIntervalInMilliSeconds,
+
             long stepTokens,
             long stepInterval,
             int stepIntervalInMilliseconds)
-            : base(maxTokens, refillInterval, refillIntervalInMilliSeconds)
+            : base(bucketTokenCapacity, refillInterval, refillIntervalInMilliSeconds)
         {
             if (stepInterval < 0)
                 throw new ArgumentOutOfRangeException(nameof(stepInterval), "Step interval cannot be negative");

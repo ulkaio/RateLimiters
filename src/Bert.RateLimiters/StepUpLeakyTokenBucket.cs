@@ -4,34 +4,37 @@
     {
         private long lastActivityTime;
 
-        public StepUpLeakyTokenBucket(long maxTokens, long refillInterval, int refillIntervalInMilliSeconds,
-            long stepTokens, long stepInterval, int stepIntervalInMilliseconds) : base(maxTokens, refillInterval,
+        public StepUpLeakyTokenBucket(
+            long bucketTokenCapacity, 
+            long refillInterval, 
+            int refillIntervalInMilliSeconds,
+            long stepTokens, 
+            long stepInterval, 
+            int stepIntervalInMilliseconds) : base(bucketTokenCapacity, refillInterval,
             refillIntervalInMilliSeconds, stepTokens, stepInterval, stepIntervalInMilliseconds)
         {
         }
 
-        protected override void UpdateTokens()
+        protected override void UpdateTokensInBucket()
         {
-            var currentTime = SystemTime.UtcNow.Ticks;
+            var currentTimeInTicks = SystemTime.UtcNow.Ticks;
 
-            if (currentTime >= nextRefillTime)
+            if (currentTimeInTicks >= nextRefillTimeInTicks)
             {
                 tokens = stepTokens;
-
-                lastActivityTime = currentTime;
-                nextRefillTime = currentTime + ticksRefillInterval;
-
+                lastActivityTime = currentTimeInTicks;
+                nextRefillTimeInTicks = currentTimeInTicks + ticksPerRefillInterval;
                 return;
             }
 
             // Calculate tokens at current step
-            long elapsedTimeSinceLastActivity = currentTime - lastActivityTime;
+            long elapsedTimeSinceLastActivity = currentTimeInTicks - lastActivityTime;
             long elapsedStepsSinceLastActivity = elapsedTimeSinceLastActivity / ticksStepInterval;
 
             tokens += elapsedStepsSinceLastActivity * stepTokens;
 
             if (tokens > bucketTokenCapacity) tokens = bucketTokenCapacity;
-            lastActivityTime = currentTime;
+            lastActivityTime = currentTimeInTicks;
         }
     }
 }
